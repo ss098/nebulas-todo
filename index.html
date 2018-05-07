@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TODO</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css"
+          integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div id="app">
+    <section v-if="wallet" class="section">
+        <div class="columns">
+            <div class="column is-one-quarter">
+                <nav class="panel">
+                    <p class="panel-heading">
+                        待办事项
+                    </p>
+                    <div class="panel-block">
+                        <p class="control has-icons-left">
+                            <input v-model="search_keyword" class="input is-small" type="text" placeholder="搜索清单或条目">
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                            </span>
+                        </p>
+                    </div>
+
+                    <a v-if="loading" class="panel-block">
+                        <loading></loading>
+                    </a>
+                    <a v-else v-for="(item, index) in filter_list"
+                       :class="{'panel-block': true, 'is-active': active_index === index}"
+                       @click="active_index = index">
+                        <span class="panel-icon">
+                            <i class="fas fa-list-ul" aria-hidden="true"></i>
+                        </span>
+                        {{ item.title }}
+                    </a>
+
+                    <a v-if="!loading" @click="add_todolist" class="panel-block">
+                        <span class="panel-icon">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                        </span>
+
+                        新建清单
+                    </a>
+                    <div v-if="!loading" class="panel-block">
+                        <button @click="save_todolist" class="button is-link is-outlined is-fullwidth">
+                            保存
+                        </button>
+                    </div>
+                </nav>
+
+                <p>
+                    保存待办事项需要消耗少量 NAS，请确保钱包内有余额。
+                </p>
+            </div>
+            <div class="column">
+                <section v-if="active_list">
+                    <h1 class="title">
+                        {{ active_list.title }}
+                        <div class="is-pulled-right">
+                            <a @click="edit_modal = true" class="button is-outlined">
+                                <span class="panel-icon">
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                </span>
+                                编辑
+                            </a>
+                        </div>
+                    </h1>
+                    <h2 v-if="active_list.subtitle" class="subtitle">
+                        {{ active_list.subtitle }}
+                    </h2>
+
+                    <nav class="panel panel-items">
+                        <a v-if="loading" class="panel-block">
+                            <loading></loading>
+                        </a>
+                        <div v-else v-for="(item, index) in filter_items"
+                           :class="{'panel-block': true, 'is-active': active_item_index === index, 'item': true}">
+                            <p class="control has-icons-left">
+                                <input @focus="active_item_index = index" @blur="active_item_index = null"
+                                       v-model="item.content" spellcheck="false" class="input" type="text"
+                                       placeholder="添加待办事项">
+                                <span class="icon is-left">
+                                    <i class="fas fa-align-left" aria-hidden="true"></i>
+                                </span>
+
+                                <div class="item-right">
+                                    <a @click="delete_todolist_item(item.id)" class="button is-radiusless">
+                                        <i class="fas fa-check" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </p>
+                        </div>
+
+                        <a @keydown.enter="add_todolist_item" class="panel-block">
+                            <p class="control has-icons-left">
+                                <input v-model="active_item_content" spellcheck="false" class="input" type="text"
+                                       placeholder="添加待办事项">
+                                <span class="icon is-left">
+                                    <i class="fas fa-plus" aria-hidden="true"></i>
+                                </span>
+                            </p>
+                        </a>
+                    </nav>
+
+                    <div v-if="edit_modal" :class="{'modal': true, 'is-active': edit_modal}">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                            <header class="modal-card-head">
+                                <p class="modal-card-title">编辑清单</p>
+                                <button @click="edit_modal = false" class="delete" aria-label="close"></button>
+                            </header>
+                            <section class="modal-card-body">
+                                <div class="field">
+                                    <label class="label">标题</label>
+                                    <div class="control">
+                                        <input v-model="active_list.title" class="input" type="text"
+                                               placeholder="简单易记的内容描述">
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label class="label">副标题</label>
+                                    <div class="control">
+                                        <input v-model="active_list.subtitle" class="input" type="text"
+                                               placeholder="详细描述清单">
+                                    </div>
+                                </div>
+                                <p>清单内条目数量：{{ active_list.items.length }}</p>
+                            </section>
+                            <footer class="modal-card-foot">
+                                <button @click="edit_modal = false" class="button is-success">确定</button>
+                                <button v-if="active_list.support_delete !== false" @click="delete_todolist"
+                                        class="button is-danger">
+                                    删除清单
+                                </button>
+                            </footer>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+    <div v-else>
+        <section class="hero is-info is-medium is-fullheight">
+            <div class="hero-head">
+                <nav class="navbar">
+                    <div class="container">
+                        <div class="navbar-menu">
+                            <div class="navbar-end">
+                                <span class="navbar-item">
+                                    <a class="button">
+                                        <span class="icon">
+                                            <i class="fab fa-github"></i>
+                                        </span>
+                                        <span>安装</span>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="hero-body">
+                <div class="container has-text-centered">
+                    <h1 class="title">
+                        帮助规划你的任务，保持专注
+                    </h1>
+                    <h2 class="subtitle">
+                        待办事项是一个 Nebulas 下的 DApp 应用，需要安装仅支持 Chrome 的 Nebulas Web 钱包
+                    </h2>
+                </div>
+            </div>
+
+            <div class="hero-foot">
+                <nav class="tabs is-boxed">
+                    <div class="container">
+                        <ul>
+                            <li class="is-active">
+                                <a>待办事项</a>
+                            </li>
+                            <li>
+                                <a href="https://www.qiyichao.cn/">作者博客</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script type="text/javascript" src="nebPay.js"></script>
+<script type="text/javascript" src="app.js"></script>
+
+</body>
+</html>
