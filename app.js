@@ -9,7 +9,12 @@ let nebPay = new NebPay()
 const app = new Vue({
     el: "#app",
     data: {
-        dapp_address: "n1qTwMkNVZJBeTc9eXE91zGxCSx6t39snaf",
+        dapp_hash: "3abc74d10e45f7abb305287a4028ef434d66e95013ff4adde6c29fb911164ea7",
+        dapp_address: "n1nZEkYqjN7m1s7oveNtpcPxV7FvRiu6ksx",
+
+        // 测试网
+        // dapp_hash: 7c6a16542a1a002849f4b45bd4d5b775a63485319ebac94d4719382f0ed5df87
+        // dapp_address: "n1rkPK2wToiXHWaqEseHemECKxp19XuzdFt",
 
         loading: false,
         search_keyword: "",
