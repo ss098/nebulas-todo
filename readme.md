@@ -1,6 +1,9 @@
-待办事项是 Nebulas（星云链）平台的一个智能合约应用，用于记录需要做的事情。在使用之前，需要安装 Nebulas 钱包（[https://github.com/nebulasio/web-wallet](https://github.com/nebulasio/web-wallet)）。
+待办事项是一个 Nebulas （星云链）下的去中心化应用（DApp），帮助规划你的任务，保持专注。
+
+在使用待办事项之前，需要安装仅支持 Chrome 的 Nebulas Web 钱包（[https://github.com/nebulasio/web-wallet](https://github.com/nebulasio/web-wallet)）。
 
 演示地址：
 
+ - Nebulas 主网：[http://qiyichao.cn/nebulas-todo/](http://qiyichao.cn/nebulas-todo/)
  - Nebulas 测试网：[http://qiyichao.cn/nebulas-todo-testnet/](http://qiyichao.cn/nebulas-todo-testnet/)
  
